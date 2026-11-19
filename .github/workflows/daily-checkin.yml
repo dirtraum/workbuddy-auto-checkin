@@ -35,4 +35,14 @@ jobs:
           WORKBUDDY_ENTERPRISE_ID: ${{ secrets.WORKBUDDY_ENTERPRISE_ID }}
           # 别人也能看到仓库时保持为空。只有自己能看的仓库，想在日志里看账户总额时，把 Actions Variable 设为 1。
           WORKBUDDY_SHOW_BALANCE: ${{ vars.WORKBUDDY_SHOW_BALANCE }}
+          # 通知（可选，配一个即可）：默认只推「新领取成功 / 未开启 / 报错」
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          WXPUSHER_APPTOKEN: ${{ secrets.WXPUSHER_APPTOKEN }}
+          WXPUSHER_UID: ${{ secrets.WXPUSHER_UID }}
+          QMSG_KEY: ${{ secrets.QMSG_KEY }}
+          QMSG_QQ: ${{ secrets.QMSG_QQ }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          # 「今日已签」也想收到消息就设变量 NOTIFY_ALWAYS=1
+          NOTIFY_ALWAYS: ${{ vars.NOTIFY_ALWAYS }}
         run: python scripts/checkin.py

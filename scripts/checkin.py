@@ -1337,6 +1337,16 @@ def public_log(payload: dict[str, Any]) -> dict[str, Any]:
 
 def emit(payload: dict[str, Any]) -> None:
     print(json.dumps(public_log(payload), ensure_ascii=False, separators=(",", ":")))
+    # 通知是旁路：放在打印之后，任何失败都吞掉，绝不改变签到退出码
+    try:
+        import notify  # 与本文件同目录
+    except Exception:  # noqa: BLE001 - 缺 notify.py 也要能跑
+        notify = None
+    if notify is not None:
+        try:
+            notify.notify_payload(payload)
+        except Exception as exc:  # noqa: BLE001
+            print(f"::warning::通知模块异常（已忽略）：{type(exc).__name__} {exc}", flush=True)
 
 
 def beijing_today() -> str:

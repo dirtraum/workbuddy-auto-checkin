@@ -266,6 +266,35 @@ WORKBUDDY_ACCESS_TOKEN
 
 要让失败时收到邮件：打开 [GitHub 通知设置](https://github.com/settings/notifications)，把 Actions 的邮件打开，可以只接收失败。
 
+### 把签到结果推到微信 / QQ（可选）
+
+邮件要翻邮箱，微信更直接。配置一次，之后每天自动推。
+
+**默认只推三种情况**：新领取成功（`CLAIMED`）、活动未开启（`INACTIVE`）、报错（`ERROR`）。
+「今日已签到」（`ALREADY`）属于一切正常的冗余信息，**默认不推**——因为这个仓库一天跑三个时段，每次都推的话 Server酱 免费额度（5 条/天）会被迅速吃光。想看全部就加一个变量 `NOTIFY_ALWAYS=1`。
+
+| 渠道 | 要配的 Secret | 怎么拿 | 免费额度 |
+|---|---|---|---|
+| **Server酱**（最简单） | `SERVERCHAN_SENDKEY` | [sct.ftqq.com](https://sct.ftqq.com) 微信扫码 → 复制 SendKey | 5 条/天 |
+| PushPlus | `PUSHPLUS_TOKEN` | [pushplus.plus](https://www.pushplus.plus) 微信登录 → 复制 token | 较宽 |
+| WxPusher | `WXPUSHER_APPTOKEN` + `WXPUSHER_UID` | [wxpusher.zjiecode.com](https://wxpusher.zjiecode.com) | 较宽 |
+| Qmsg酱（QQ） | `QMSG_KEY`（+ 可选 `QMSG_QQ`） | [qmsg.zendee.cn](https://qmsg.zendee.cn) 加它 QQ 为好友 | 有限 |
+| 钉钉/飞书 | `NOTIFY_WEBHOOK` | 群机器人 webhook | 不限 |
+
+**Server酱 三步**
+
+1. https://sct.ftqq.com 微信扫码登录，点「SendKey」复制 `SCT` 开头那串
+2. 仓库 → Settings → Secrets and variables → Actions → New repository secret，Name 填 `SERVERCHAN_SENDKEY`
+3. **关注它的微信服务号**（页面二维码），不关注收不到推送
+4. 之后每天：
+   - 领取成功 → 「WorkBuddy 签到成功 / 成功领取 100 积分，连续 7 天」
+   - 出问题 → 「WorkBuddy 签到失败 / <具体报错>」
+
+**注意额度共享**：如果你还有别的签到项目（比如 trae-auto-checkin）也在用同一个 SendKey，5 条/天是**共用**的。两个项目各 1 条/天时够用，但手动测试几次就会撞上限额。超额后返回 `40014`，看起来和真实失败一样，容易误判。额度紧张时换 PushPlus，或给另一个项目单独申请 key。
+
+推送失败**不会**让签到变红：通知是旁路，代码里任何异常都被吞掉，退出码仍由签到本身决定。
+
+
 ## 技术说明
 
 Python 3.12，只用标准库，没有第三方依赖，也没有前端。定时任务在 GitHub Actions 上跑。登录态只放在仓库 Secrets 里。
