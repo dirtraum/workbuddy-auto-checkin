@@ -242,7 +242,9 @@ WORKBUDDY_ACCESS_TOKEN
 
 ### 做完之后会怎样
 
-你的 Fork 每天自动跑三次，北京时间 00:36、12:23、20:41。GitHub 可能推迟或丢掉其中一次，后面的次数会补上。今天已经领过时，再跑会得到 `ALREADY`，不会多领 100 积分。
+你的 Fork 每天自动跑**一次**，北京时间 00:36（UTC 16:36）。今天已经领过时，再跑会得到 `ALREADY`，不会多领 100 积分。
+
+> 只跑一次意味着**没有当日补跑**：GitHub 偶尔会把定时任务推迟或直接丢掉，那一槽就没了。手上有空时点一次 **Run workflow** 补上即可（已签过会自动跳过，不会重复领）。
 
 登录大约过一段时间会失效。失效时这次运行是红色的，日志里有登录态失效或 HTTP 401。登录文件里还能复制 `accessToken` 时，重新打开桌面端并登录，再按第 4 步和第 5 步更新同一个 `WORKBUDDY_ACCESS_TOKEN`。文件里仍然没有可复制的 token 时，用上面的短信办法换一行新的 refreshToken，贴进同一个 Secret。然后按第 6 步再跑一次。
 
@@ -271,7 +273,7 @@ WORKBUDDY_ACCESS_TOKEN
 邮件要翻邮箱，微信更直接。配置一次，之后每天自动推。
 
 **默认只推三种情况**：新领取成功（`CLAIMED`）、活动未开启（`INACTIVE`）、报错（`ERROR`）。
-「今日已签到」（`ALREADY`）属于一切正常的冗余信息，**默认不推**——因为这个仓库一天跑三个时段，每次都推的话 Server酱 免费额度（5 条/天）会被迅速吃光。想看全部就加一个变量 `NOTIFY_ALWAYS=1`。
+「今日已签到」（`ALREADY`）属于一切正常的冗余信息，**默认不推**——同一天手动补跑几次就会推几次，Server酱 免费额度（5 条/天）容易被吃光。想看全部就加一个变量 `NOTIFY_ALWAYS=1`。
 
 | 渠道 | 要配的 Secret | 怎么拿 | 免费额度 |
 |---|---|---|---|
@@ -300,7 +302,7 @@ WORKBUDDY_ACCESS_TOKEN
 Python 3.12，只用标准库，没有第三方依赖，也没有前端。定时任务在 GitHub Actions 上跑。登录态只放在仓库 Secrets 里。
 
 ```text
-GitHub Actions（北京时间 00:36 / 12:23 / 20:41）
+GitHub Actions（北京时间 00:36，每天一次）
         │
         ▼
 scripts/checkin.py
@@ -320,7 +322,7 @@ scripts/checkin.py
 | 定时 | `.github/workflows/daily-checkin.yml` |
 | 接口域名 | `https://www.codebuddy.cn`，备选 `https://copilot.tencent.com` |
 
-三条定时都躲开整点。GitHub 可能推迟或丢掉其中一槽，后面的槽会补上。定时任务只在默认分支上运行。
+定时躲开整点（00:36 UTC+8）。GitHub 可能推迟或丢掉这一槽，当天没有自动补跑，需要手动点一次 Run workflow。定时任务只在默认分支上运行。
 
 ### 每天实际做了什么
 
