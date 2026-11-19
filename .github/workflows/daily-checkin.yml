@@ -58,4 +58,9 @@ jobs:
           NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
           FAILED_STEP: ${{ job.status }}
         run: |
-          python scripts/notify.py --fallback || echo "兜底通知未发出（不影响运行结论）"
+          # 主步骤已经成功推过通知就跳过，避免一次失败收到两条微信
+          if [ -f .notify_sent ]; then
+            echo "主步骤已推送过通知（$(cat .notify_sent)），跳过兜底"
+          else
+            python scripts/notify.py --fallback || echo "兜底通知未发出（不影响运行结论）"
+          fi

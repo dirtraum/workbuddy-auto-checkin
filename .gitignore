@@ -16,3 +16,6 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# 通知去重标记（运行时生成，不要提交）
+.notify_sent

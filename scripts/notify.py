@@ -164,6 +164,12 @@ def notify_payload(payload: dict[str, Any]) -> None:
     _SENT = True
     if sent:
         print(f"通知已推送：{'、'.join(sent)}", flush=True)
+        # 标记：workflow 的 failure 兜底步骤看到它就跳过，避免一次失败收到两条微信
+        try:
+            with open(".notify_sent", "w", encoding="utf-8") as f:
+                f.write(",".join(sent))
+        except Exception:  # noqa: BLE001
+            pass
     elif any(os.environ.get(k, "").strip() for k in (
             "SERVERCHAN_SENDKEY", "PUSHPLUS_TOKEN", "WXPUSHER_APPTOKEN", "QMSG_KEY", "NOTIFY_WEBHOOK")):
         print("通知没有推送成功，检查 key/额度", flush=True)
