@@ -146,6 +146,11 @@ def notify_payload(payload: dict[str, Any]) -> None:
         if total is not None:
             lines.append(f"账户总额：{total}")
 
+    # 领到了积分但活跃地图没点亮：签到脚本会以非 0 退出，通知里要说清楚
+    growth = payload.get("growth") if isinstance(payload.get("growth"), dict) else {}
+    if result == "CLAIMED" and growth.get("calendar_lit") is False:
+        lines.append("⚠ 活跃地图今天还没点亮（这一格仍是空的），建议去 Actions 手动补跑一次")
+
     text = "\n".join(lines) or "（无详情）"
     if result == "ERROR":
         text += "\n\n请去 Actions 日志看具体报错，多半是凭据需要重新获取。"
