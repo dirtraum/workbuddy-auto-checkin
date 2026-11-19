@@ -43,3 +43,19 @@ jobs:
           # 「今日已签」也想收到消息就设变量 NOTIFY_ALWAYS=1
           NOTIFY_ALWAYS: ${{ vars.NOTIFY_ALWAYS }}
         run: python scripts/checkin.py
+
+      # 兜底：前面任何一步失败（含依赖安装、Python 崩溃）都补一条微信，
+      # 不依赖签到脚本自己跑成功。
+      - name: 失败兜底通知
+        if: failure()
+        env:
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          WXPUSHER_APPTOKEN: ${{ secrets.WXPUSHER_APPTOKEN }}
+          WXPUSHER_UID: ${{ secrets.WXPUSHER_UID }}
+          QMSG_KEY: ${{ secrets.QMSG_KEY }}
+          QMSG_QQ: ${{ secrets.QMSG_QQ }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          FAILED_STEP: ${{ job.status }}
+        run: |
+          python scripts/notify.py --fallback || echo "兜底通知未发出（不影响运行结论）"

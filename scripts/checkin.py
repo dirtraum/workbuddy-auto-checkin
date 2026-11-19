@@ -2292,6 +2292,16 @@ def main(argv: list[str] | None = None) -> int:
             payload.update(exc.details)
         emit(payload)
         return exc.exit_code
+    except Exception as exc:  # noqa: BLE001 - 兜底：未预期异常也要能推到微信
+        # 不兜底的话，这里只会留下一个红色运行和 traceback，微信收不到任何消息
+        emit({
+            "result": "ERROR",
+            "report": f"未预期异常：{type(exc).__name__}: {exc}（详见 Actions 日志）",
+        })
+        return EXIT_BUSINESS
+    finally:
+        # 让 traceback 照常输出，方便在日志里定位
+        pass
 
 
 if __name__ == "__main__":

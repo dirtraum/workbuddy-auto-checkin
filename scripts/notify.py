@@ -162,3 +162,27 @@ def notify_payload(payload: dict[str, Any]) -> None:
     elif any(os.environ.get(k, "").strip() for k in (
             "SERVERCHAN_SENDKEY", "PUSHPLUS_TOKEN", "WXPUSHER_APPTOKEN", "QMSG_KEY", "NOTIFY_WEBHOOK")):
         print("通知没有推送成功，检查 key/额度", flush=True)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """命令行入口：给 workflow 的 `if: failure()` 兜底步骤用。
+
+    `python scripts/notify.py --fallback` 发一条"工作流失败"的消息。
+    这条路径不依赖签到脚本本身，所以哪怕 Python 步骤崩了、依赖没装上，
+    只要通知 Secret 配了，微信仍然收得到。
+    """
+    argv = list(argv if argv is not None else os.sys.argv[1:])
+    if "--fallback" in argv:
+        step = os.environ.get("FAILED_STEP", "").strip()
+        report = "GitHub Actions 运行失败。"
+        if step:
+            report += f"失败步骤：{step}。"
+        report += "常见原因是登录态失效、接口变动或网络波动，请打开运行日志查看具体报错。"
+        notify_payload({"result": "ERROR", "report": report})
+        return 0
+    print("用法：python scripts/notify.py --fallback")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
